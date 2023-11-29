@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	app2 "fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -9,6 +10,7 @@ import (
 	"github.com/tasnimzotder/artificial-life/gameOfLife"
 	"github.com/tasnimzotder/artificial-life/utils"
 	"image/color"
+	"strconv"
 	"time"
 )
 
@@ -66,32 +68,77 @@ func main() {
 	fps := widget.NewLabel("0")
 	fps.SetText("60")
 
-	startPauseButton := widget.NewButton("Start/Pause", func() {
-		gameOfLife.HandleGOL(gameSettings, fps)
+	loadGoLButton := widget.NewButton("Load GoL", func() {
+		//gameOfLife.HandleGOL(gameSettings, fps)
+	})
+
+	startStopButton := widget.NewButton("Start/Pause", func() {
+		//gameSettings.IsPaused = !gameSettings.IsPaused
 	})
 
 	resetButton := widget.NewButton("Reset", func() {
-		gameSettings.IsReset = true
-
-		time.Sleep(2 * time.Second)
-
-		gameOfLife.HandleReset(tileGrid, gameSettings)
+		//gameSettings.IsReset = true
+		//
+		//time.Sleep(2 * time.Second)
+		//
+		//gameOfLife.HandleReset(tileGrid, gameSettings)
 	})
 
-	buttons := container.NewHBox(startPauseButton, resetButton, fps)
+	beginButton := widget.NewButton("Begin", func() {
+		GameRunner(gameSettings, startStopButton, resetButton, fps)
+	})
+
+	buttons := container.NewHBox(beginButton, loadGoLButton, startStopButton, resetButton, fps)
 	content := container.NewVBox(grid, buttons)
 
 	window.SetContent(content)
 	window.ShowAndRun()
 
-	//time.Sleep(5 * time.Second)
-	//
-	//fmt.Println("starting")
-	//
-	//tile := tileGrid[0][0]
-	//tile.FillColor = color.RGBA{R: 0, G: 255, B: 0, A: 0xff}
-	//tile.Refresh()
-	//
-	//time.Sleep(1 * time.Second)
+}
 
+func GameRunner(gameSettings *utils.GameSettings, startStopButton, resetButton *widget.Button, fpsWidget *widget.Label) {
+	gameSettings.IsReset = false
+	gameSettings.IsPaused = true
+
+	gameOfLife.GenerateInitialRandomGrid(gameSettings)
+	time.Sleep(500 * time.Millisecond)
+
+	go func() {
+		for {
+			startStopButton.OnTapped = func() {
+				fmt.Println("startStopButton.OnTapped")
+				gameSettings.IsPaused = !gameSettings.IsPaused
+			}
+
+			resetButton.OnTapped = func() {
+				fmt.Println("resetButton.OnTapped")
+				gameSettings.IsReset = true
+				HandleReset(gameSettings)
+			}
+		}
+	}()
+
+	go func() {
+		for range time.Tick(1 * time.Second) {
+			prevTime := time.Now()
+
+			if !gameSettings.IsPaused {
+				gameOfLife.MovementHandler(gameSettings)
+			}
+
+			elapsed := time.Since(prevTime).Seconds()
+			fps := int(1 / elapsed)
+
+			fpsWidget.SetText("FPS: " + strconv.Itoa(fps))
+
+			fmt.Println("running")
+		}
+	}()
+}
+
+func HandleReset(gameSettings *utils.GameSettings) {
+	gameOfLife.ClearGoLGrid(*gameSettings.TileGrid, gameSettings)
+
+	gameSettings.IsReset = false
+	gameSettings.IsPaused = true
 }
