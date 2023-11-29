@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/tasnimzotder/artificial-life/gameOfLife"
+	"github.com/tasnimzotder/artificial-life/smoothLife"
 	"github.com/tasnimzotder/artificial-life/utils"
 	"image/color"
 	"strconv"
@@ -26,119 +27,174 @@ func main() {
 		windowHeight = 9 * 60
 	)
 
-	// set window size
 	window.Resize(fyne.NewSize(windowWidth, windowHeight))
-
-	//windowSize := window.Canvas().Size()
-
-	//fmt.Printf("window size: %v\n", windowSize)
 
 	gameSettings.Rows = windowHeight / minTileSize
 	gameSettings.Cols = windowWidth / minTileSize
 	gameSettings.IsPaused = true
 	gameSettings.AliveColor = color.RGBA{R: 0, G: 255, B: 0, A: 0xff}
-	gameSettings.DeathColor = color.RGBA{R: 255, G: 0, B: 0, A: 0xff}
+	gameSettings.DeathColor = color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
+	gameSettings.FPS = 2
+	gameSettings.GameTypes = []string{"GoL", "SmoothLife", "Lenia"}
+	gameSettings.GameType = gameSettings.GameTypes[0]
 
 	grid := container.NewGridWithColumns(gameSettings.Cols)
 	tileGrid := make([][]*canvas.Rectangle, gameSettings.Rows)
 
-	for i := 0; i < gameSettings.Rows; i++ {
-		tileGrid[i] = make([]*canvas.Rectangle, gameSettings.Cols)
-
-		for j := 0; j < gameSettings.Cols; j++ {
-			rect := canvas.NewRectangle(color.RGBA{R: 150, G: 122, B: 200, A: 0xff})
-			rect.SetMinSize(fyne.NewSize(minTileSize, minTileSize))
-
-			tileGrid[i][j] = rect
-			grid.Add(rect)
-		}
-	}
-
 	gameSettings.TileGrid = &tileGrid
-
-	//for i := 0; i < rows; i++ {
-	//	for j := 0; j < cols; j++ {
-	//		rect := canvas.NewRectangle(color.RGBA{R: 150, G: 122, B: 200, A: 0xff})
-	//		rect.SetMinSize(fyne.NewSize(10, 10))
-	//
-	//		grid.Add(rect)
-	//	}
-	//}
 
 	fps := widget.NewLabel("0")
 	fps.SetText("60")
 
-	loadGoLButton := widget.NewButton("Load GoL", func() {
-		//gameOfLife.HandleGOL(gameSettings, fps)
-	})
+	//loadGoLButton := widget.NewButton("Load GoL", func() {
+	//	// ...
+	//})
 
 	startStopButton := widget.NewButton("Start/Pause", func() {
-		//gameSettings.IsPaused = !gameSettings.IsPaused
+		// ...
 	})
 
 	resetButton := widget.NewButton("Reset", func() {
-		//gameSettings.IsReset = true
-		//
-		//time.Sleep(2 * time.Second)
-		//
-		//gameOfLife.HandleReset(tileGrid, gameSettings)
+		//	...
 	})
+
+	fpsSlider := widget.NewSlider(1, 100)
+	fpsSlider.SetValue(2)
+
+	gameTypeSelector := widget.NewSelect(gameSettings.GameTypes, func(s string) {
+		gameSettings.GameType = s
+	})
+
+	gameTypeSelector.SetSelected("GoL")
 
 	beginButton := widget.NewButton("Begin", func() {
-		GameRunner(gameSettings, startStopButton, resetButton, fps)
+		GameRunner(gameSettings, startStopButton, resetButton, fps, fpsSlider, gameTypeSelector)
 	})
 
-	buttons := container.NewHBox(beginButton, loadGoLButton, startStopButton, resetButton, fps)
-	content := container.NewVBox(grid, buttons)
+	fpsSliderContainer := container.NewVBox(widget.NewLabel("FPS"), fpsSlider)
+
+	// generate grid
+	GenerateGrid(minTileSize, gameSettings, grid)
+
+	buttons := container.NewHBox(gameTypeSelector, beginButton, startStopButton, resetButton, fps)
+	content := container.NewVBox(grid, fpsSliderContainer, buttons)
 
 	window.SetContent(content)
 	window.ShowAndRun()
-
 }
 
-func GameRunner(gameSettings *utils.GameSettings, startStopButton, resetButton *widget.Button, fpsWidget *widget.Label) {
-	gameSettings.IsReset = false
-	gameSettings.IsPaused = true
+func GameRunner(gs *utils.GameSettings, startStopButton, resetButton *widget.Button, fpsWidget *widget.Label, fpsSlider *widget.Slider, gameSelector *widget.Select) {
+	gs.IsReset = true
+	HandleReset(gs)
+	time.Sleep(500 * time.Millisecond)
 
-	gameOfLife.GenerateInitialRandomGrid(gameSettings)
+	//gs.IsReset = false
+	gs.IsPaused = true
+
+	if gs.GameType == gs.GameTypes[0] { // "GoL"
+		gameOfLife.GenerateInitialRandomGrid(gs)
+	} else if gs.GameType == gs.GameTypes[1] { // "SmoothLife"
+		smoothLife.GenerateInitialRandomGridSmoothLife(gs)
+	}
+
 	time.Sleep(500 * time.Millisecond)
 
 	go func() {
 		for {
 			startStopButton.OnTapped = func() {
 				fmt.Println("startStopButton.OnTapped")
-				gameSettings.IsPaused = !gameSettings.IsPaused
+				gs.IsPaused = !gs.IsPaused
+
+				if !gs.IsPaused && gs.IsReset {
+					gs.IsReset = false
+				}
 			}
 
 			resetButton.OnTapped = func() {
 				fmt.Println("resetButton.OnTapped")
-				gameSettings.IsReset = true
-				HandleReset(gameSettings)
+				gs.IsReset = true
+				gs.FPS = 2
+				fpsSlider.SetValue(2)
+
+				HandleReset(gs)
+			}
+
+			fpsSlider.OnChanged = func(value float64) {
+				fmt.Println("fpsSlider.OnChanged")
+				gs.FPS = int(value)
+			}
+
+			gameSelector.OnChanged = func(s string) {
+				fmt.Printf("gameSelector.OnChanged: %s\n", s)
+				gs.GameType = s
+			}
+
+			if gs.IsReset {
+				break
 			}
 		}
 	}()
 
-	go func() {
-		for range time.Tick(1 * time.Second) {
-			prevTime := time.Now()
+	prevTime := time.Now()
 
-			if !gameSettings.IsPaused {
-				gameOfLife.MovementHandler(gameSettings)
+	go func() {
+		for {
+			if !gs.IsPaused {
+				if gs.GameType == gs.GameTypes[0] { // "GoL"
+					gameOfLife.MovementHandler(gs)
+				} else if gs.GameType == gs.GameTypes[1] { // "SmoothLife"
+					smoothLife.MovementHandlerSmoothLife(gs)
+				}
 			}
 
 			elapsed := time.Since(prevTime).Seconds()
 			fps := int(1 / elapsed)
+			prevTime = time.Now()
 
 			fpsWidget.SetText("FPS: " + strconv.Itoa(fps))
 
-			fmt.Println("running")
+			fpsMillis := 1000 / (gs.FPS)
+			time.Sleep(time.Duration(fpsMillis) * time.Millisecond)
+
+			if gs.IsReset {
+				break
+			}
 		}
 	}()
 }
 
 func HandleReset(gameSettings *utils.GameSettings) {
-	gameOfLife.ClearGoLGrid(*gameSettings.TileGrid, gameSettings)
-
+	//gameOfLife.ClearGoLGrid(*gameSettings.TileGrid, gameSettings)
+	ClearGrid(gameSettings)
 	gameSettings.IsReset = false
 	gameSettings.IsPaused = true
+}
+
+func GenerateGrid(tileSize int, gs *utils.GameSettings, grid *fyne.Container) {
+	tileGrid := *gs.TileGrid
+
+	for i := 0; i < gs.Rows; i++ {
+		tileGrid[i] = make([]*canvas.Rectangle, gs.Cols)
+
+		for j := 0; j < gs.Cols; j++ {
+			rect := canvas.NewRectangle(gs.DeathColor)
+			rect.SetMinSize(fyne.NewSize(float32(tileSize), float32(tileSize)))
+
+			tileGrid[i][j] = rect
+			grid.Add(rect)
+		}
+	}
+}
+
+func ClearGrid(gs *utils.GameSettings) {
+	tileGrid := *gs.TileGrid
+
+	for i := 0; i < gs.Rows; i++ {
+		for j := 0; j < gs.Cols; j++ {
+			tile := tileGrid[i][j]
+
+			tile.FillColor = gs.DeathColor
+			tile.Refresh()
+		}
+	}
 }

@@ -13,4 +13,7 @@ type GameSettings struct {
 	TileGrid   *[][]*canvas.Rectangle
 	AliveColor color.RGBA
 	DeathColor color.RGBA
+	FPS        int
+	GameType   string // "GoL", "Lenia", "SmoothLife"
+	GameTypes  []string
 }
