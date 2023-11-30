@@ -12,16 +12,22 @@ func GetSurroundingAliveTiles(row int, col int, gs *GameSettings) []color.Color 
 			// if out of bounds, wrap around
 			ix, jx := i, j
 
-			if i < 0 {
-				ix = gs.Rows - 1
-			} else if i >= gs.Rows {
-				ix = 0
-			}
+			if gs.WrapAround {
+				if i < 0 {
+					ix = gs.Rows - 1
+				} else if i >= gs.Rows {
+					ix = 0
+				}
 
-			if j < 0 {
-				jx = gs.Cols - 1
-			} else if j >= gs.Cols {
-				jx = 0
+				if j < 0 {
+					jx = gs.Cols - 1
+				} else if j >= gs.Cols {
+					jx = 0
+				}
+			} else {
+				if i < 0 || i >= gs.Rows || j < 0 || j >= gs.Cols {
+					continue
+				}
 			}
 
 			if ix == row && jx == col {
