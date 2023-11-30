@@ -33,7 +33,12 @@ func GameRunner(
 
 	go func() {
 		for {
+			prevStartTime := time.Now()
+
 			if !gs.IsPaused {
+				// update the T0 value
+				gs.Parameters.T += 1
+			
 				if gs.GameType == gs.GameTypes[0] { // "GoL"
 					gameOfLife.MovementHandler(gs)
 				} else if gs.GameType == gs.GameTypes[1] { // "SmoothLife"
@@ -41,9 +46,10 @@ func GameRunner(
 				}
 			}
 
-			elapsed := time.Since(prevTime).Seconds()
-			fps := int(1 / elapsed)
-			prevTime = time.Now()
+			currTime := time.Now()
+			elapsed := currTime.Sub(prevTime).Seconds()
+			fps := 1.0 / elapsed
+			prevTime = currTime
 
 			if gs.IsPaused {
 				fps = 0
@@ -53,7 +59,9 @@ func GameRunner(
 			gs.CurrentFPS = fps
 
 			fpsMillis := 1000 / (gs.FPS)
-			time.Sleep(time.Duration(fpsMillis) * time.Millisecond)
+			loopTime := time.Now().Sub(prevStartTime).Milliseconds()
+
+			time.Sleep(time.Duration(fpsMillis)*time.Millisecond - time.Duration(loopTime)*time.Millisecond)
 
 			if gs.IsReset {
 				break

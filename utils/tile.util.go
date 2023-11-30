@@ -4,6 +4,11 @@ import (
 	"image/color"
 )
 
+/*
+GetSurroundingAliveTiles returns a slice of color.Color (alive tiles)
+surrounding the given tile. Here, the tile is specified by its row and column
+number.
+*/
 func GetSurroundingAliveTiles(row int, col int, gs *GameSettings) []color.Color {
 	var aliveTiles []color.Color
 

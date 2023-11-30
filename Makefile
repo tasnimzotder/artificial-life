@@ -1,10 +1,10 @@
 IMAGE_NAME = "tasnimzotder/artificial-life"
 
-build:
+dkr_build:
 	docker build -t $(IMAGE_NAME):latest .
 
-run:
-	docker run -it --rm $(IMAGE_NAME):latest
+dkr_run:
+	docker run -it --rm -p 8080:8080 $(IMAGE_NAME):latest
 
 
-.PHONY: build run
+.PHONY: dkr_build dkr_run
