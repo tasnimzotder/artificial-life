@@ -3,11 +3,13 @@
 ## Simulations
 
 1. Conway's Game of Life
-2. Lenia __(TODO)__
-3. Boids __(TODO)__
+2. SmoothLife __TODO__
+3. Lenia __(TODO)__
 
 
 ## Conway's Game of Life
+
+![gol](./assets/gol.png)
 
 ### Description
 
@@ -33,18 +35,7 @@ The implementation is based on the [Conway's Game of Life](https://en.wikipedia.
 
 ![Glider](https://upload.wikimedia.org/wikipedia/commons/f/f2/Game_of_life_animated_glider.gif)
 
-#### Lightweight spaceship
-
-![Lightweight spaceship](https://upload.wikimedia.org/wikipedia/commons/4/4b/Life%5E2_LWSS.gif)
 
 #### Gosper glider gun
 
 ![Gosper glider gun](https://upload.wikimedia.org/wikipedia/commons/e/e5/Gospers_glider_gun.gif)
-
-#### Random
-
-![Random](https://upload.wikimedia.org/wikipedia/commons/6/64/Game_of_life_random_pentomino.gif)
-
-#### Infinite growth
-
-![Infinite growth](https://upload.wikimedia.org/wikipedia/commons/9/96/Game_of_life_infinite_growth.gif)

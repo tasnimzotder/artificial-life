@@ -3,13 +3,17 @@ package utils
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"time"
 )
 
 func HandleReset(gs *GameSettings) {
 	//gameOfLife.ClearGoLGrid(*gs.TileGrid, gs)
+	time.Sleep(500 * time.Millisecond)
+
 	ClearGrid(gs)
 	gs.IsReset = false
 	gs.IsPaused = true
+	gs.Parameters.T = 0
 }
 
 func GenerateGrid(tileSize int, gs *GameSettings, grid *fyne.Container) {

@@ -12,6 +12,10 @@ const (
 	TileCornerRadius = TileSize / 10.0
 )
 
+type Parameters struct {
+	T int
+}
+
 type GameSettings struct {
 	Rows       int
 	Cols       int
@@ -21,10 +25,11 @@ type GameSettings struct {
 	AliveColor color.RGBA
 	DeathColor color.RGBA
 	FPS        int
-	CurrentFPS int
+	CurrentFPS float64
 	GameType   string // "GoL", "Lenia", "SmoothLife"
 	GameTypes  []string
 	Preset     string // "Random", "Glider", "GliderGun", "Pulsar", "Pentadecathlon"
 	Presets    map[string][]string
 	WrapAround bool
+	Parameters Parameters
 }
