@@ -3,8 +3,9 @@
 ## Simulations
 
 1. Conway's Game of Life
-2. SmoothLife __TODO__
-3. Lenia __(TODO)__
+2. Larger than Life
+3. SmoothLife __TODO__
+4. Lenia __(TODO)__
 
 
 ## Conway's Game of Life
@@ -39,3 +40,10 @@ The implementation is based on the [Conway's Game of Life](https://en.wikipedia.
 #### Gosper glider gun
 
 ![Gosper glider gun](https://upload.wikimedia.org/wikipedia/commons/e/e5/Gospers_glider_gun.gif)
+
+## References
+
+- [Conway's Game of Life - LifeWiki](https://conwaylife.com/wiki/Conway%27s_Game_of_Life)
+- [Larger than Life - LifeWiki](https://conwaylife.com/wiki/Larger_than_Life#:~:text=N%20%3D%20(2%20%C2%B7%207%20%2B,%3D%20225%20%2F%2025%20%3D%209.))
+- [Generalization of Conway's Game of Life - SmoothLife - presentation](https://www.youtube.com/watch?v=iyTIXRhjXII&list)
+- [Rafler, S. (2011). Generalization of Conway's "Game of Life" to a continuous domain - SmoothLife. ArXiv. /abs/1111.1567](https://arxiv.org/abs/1111.1567)
