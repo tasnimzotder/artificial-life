@@ -1,33 +1,37 @@
 package main
 
 import (
-	"github.com/tasnimzotder/artificial-life/handlers"
+	"github.com/ebitenui/ebitenui"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/tasnimzotder/artificial-life/settings"
-	"github.com/tasnimzotder/artificial-life/ui"
-	"time"
+	"github.com/tasnimzotder/artificial-life/ui2"
+	"log"
 )
 
 func main() {
-	g := &ui.Game{}
-	g.NewGame()
+	gameSettings := settings.NewGameSettings()
+	uiWidgets := ui2.NewUiWidget(gameSettings)
 
-	gs := &settings.GameSettings{}
-	gs.NewGameSettings()
+	eui := &ebitenui.UI{
+		Container: uiWidgets.RootContainer,
+	}
 
-	gd := &settings.GameData{}
-	gd.NewGameData()
+	g := &ui2.Game{
+		Settings: gameSettings,
+		World: settings.NewWorld(
+			gameSettings.WorldWidth,
+			gameSettings.WorldHeight,
+			(gameSettings.WorldWidth*gameSettings.WorldHeight)/2,
+		),
+		UI: eui,
+	}
 
-	uic := &ui.UIController{}
-	uic.NewUIController(gs)
+	ebiten.SetWindowSize(ui2.ScreenWidth, ui2.ScreenHeight)
+	ebiten.SetWindowTitle("Artificial Life")
+	ebiten.SetVsyncEnabled(true)
+	//ebiten.SetFullscreen(true)
 
-	time.Sleep(time.Second)
-
-	// main loop
-	go func() {
-		handlers.GameLoopHandler(g, gs, gd)
-	}()
-
-	g.Widgets = uic.Content
-	g.Run()
-
+	if err := ebiten.RunGame(g); err != nil {
+		log.Fatalf("Ebiten run game error: %v", err)
+	}
 }

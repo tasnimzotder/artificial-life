@@ -7,6 +7,12 @@
 3. SmoothLife __TODO__
 4. Lenia __(TODO)__
 
+Run in the local environment:
+
+```bash
+go run github.com/tasnimzotder/artificial-life@latest
+```
+
 
 ## Conway's Game of Life
 
