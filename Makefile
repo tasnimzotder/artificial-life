@@ -7,6 +7,7 @@ dkr_run:
 	docker run -it --rm -p 8080:8080 $(IMAGE_NAME):latest
 
 app-install:
+	rm -rf /Applications/Artificial\ Life.app/
 	fyne install -icon Icon.png
 
 app-pack:
