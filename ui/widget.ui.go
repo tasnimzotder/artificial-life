@@ -351,7 +351,7 @@ func getSlider(name string, gs *settings.GameSettings) *widget.Slider {
 		widget.SliderOpts.Direction(widget.DirectionHorizontal),
 		// Set the minimum and maximum value for the slider
 		// todo: fix it
-		widget.SliderOpts.MinMax(1, 150),
+		widget.SliderOpts.MinMax(1, 1024*1),
 
 		widget.SliderOpts.WidgetOpts(
 			// Set the Widget to layout in the center on the screen

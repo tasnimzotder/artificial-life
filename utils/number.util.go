@@ -27,3 +27,10 @@ func RandomColor0n255() uint8 {
 func RandomColor255() uint8 {
 	return uint8(rand.Intn(255))
 }
+
+func EMod(a, b int) int {
+	// eMod is the euclidean modulo
+	// it returns a positive number
+
+	return (a%b + b) % b
+}

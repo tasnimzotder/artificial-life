@@ -36,13 +36,13 @@ func (g *Game) createInitialPixels() {
 	//maxInitialLiveCells := int(float32(g.Settings.WorldWidth*g.Settings.WorldHeight) / 1.5)
 	//maxInitialLiveCells := int(float32(g.Settings.WorldWidth*g.Settings.WorldHeight) / 2)
 	//
-	if g.Settings.GameType == constants.GAME_TYPE_GOL {
+	if g.Settings.GameType == constants.GameTypeGol {
 		if g.Settings.Preset == "Random" {
 			g.World.InitRandom(g.Settings.GameType)
 		} else {
 			g.World.InitPreset(g.Settings.GameType, g.Settings.Preset)
 		}
-	} else if g.Settings.GameType == constants.GAME_TYPE_LTL || g.Settings.GameType == constants.GAME_TYPE_SMOOTH_LIFE {
+	} else if g.Settings.GameType == constants.GameTypeLtl || g.Settings.GameType == constants.GameTypeSmoothLife {
 		g.World.InitRandom(g.Settings.GameType)
 	}
 
@@ -79,7 +79,7 @@ func (g *Game) Update() error {
 	if tps < 60 {
 		tps = 60
 	} else {
-		tps = int(float32(tps) * 2)
+		tps = int(float32(tps) * 1.25)
 	}
 
 	//ebiten.SetTPS(g.Settings.DesiredTPS)

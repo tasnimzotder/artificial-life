@@ -29,12 +29,6 @@ func GetAllGoLPresets() []PresetType {
 	return presets
 }
 
-//var GliderGOL = [][]int{
-//	{1, 0, 1},
-//	{0, 1, 1},
-//	{0, 1, 0},
-//}
-
 var GoLPresets = map[string]PresetType{
 	"Random": {
 		Name:   "Random",

@@ -2,13 +2,6 @@ package utils
 
 import "math"
 
-func EMod(a, b int) int {
-	// eMod is the euclidean modulo
-	// it returns a positive number
-
-	return (a%b + b) % b
-}
-
 func SigmaSL(x, a, alpha float64) float64 {
 	tempVal := -(x - a) * 4.0 / alpha
 	return 1.0 / (1.0 + math.Exp(tempVal))

@@ -15,4 +15,13 @@ wasm-copy:
 mac-arm64-build:
 	env GOOS=darwin GOARCH=arm64 go build -o bin/artificial-life-mac-arm64.bin
 
-.PHONY: dkr-build dkr-run
+test:
+	go test ./... -v -cover
+
+test-viz:
+	go test ./... -v -cover -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+
+bench:
+	go test ./... -bench=. -benchmem -benchtime=10s
+
+.PHONY: dkr-build dkr-run wasm-build wasm-copy mac-arm64-build test bench

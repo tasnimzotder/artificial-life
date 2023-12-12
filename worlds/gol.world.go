@@ -9,16 +9,13 @@ type GoLWorld struct {
 	nextArea []byte // temporary area for next generation
 	width    int
 	height   int
-	length   int
+	length   int // width * height
 }
 
 func NewGoLWorld(width, height int) *GoLWorld {
-	area := make([]byte, width*height)
-	nextArea := make([]byte, width*height)
-
 	w := &GoLWorld{
-		area:     area,
-		nextArea: nextArea,
+		area:     make([]byte, width*height),
+		nextArea: make([]byte, width*height),
 		width:    width,
 		height:   height,
 		length:   width * height,
@@ -27,105 +24,122 @@ func NewGoLWorld(width, height int) *GoLWorld {
 	return w
 }
 
-func (gl *GoLWorld) GetSize() (width, height int) {
-	return gl.width, gl.height
-}
+func (w *GoLWorld) InitRandom() {
+	// clear the world first to avoid having to check for dead cells
+	w.ClearWorld()
 
-func (gl *GoLWorld) GetLength() int {
-	return gl.length
-}
+	for y := 0; y < w.height; y++ {
+		for x := 0; x < w.width; x++ {
+			randomState := rand.Intn(2)
 
-func (gl *GoLWorld) InitRandom() {
-	gl.ClearWorld()
-
-	for idx := 0; idx < gl.length/4; idx++ {
-		x := rand.Intn(gl.width)
-		y := rand.Intn(gl.height)
-
-		(gl.area)[y*gl.width+x] = 1
+			if randomState == 1 {
+				w.UpdateCell(x, y, true) // Set the cell to alive
+			}
+		}
 	}
 }
 
-func (gl *GoLWorld) InitPreset(preset [][]uint8) {
-	gl.ClearWorld()
+func (w *GoLWorld) InitPreset(preset [][]uint8) {
+	// clear the world first to avoid having to check for dead cells
+	w.ClearWorld()
 
-	cRow := gl.height/2 - len(preset)/2
-	cCol := gl.width/2 - len(preset[0])/2
+	cRow := w.height/2 - len(preset)/2
+	cCol := w.width/2 - len(preset[0])/2
 
 	for r := 0; r < len(preset); r++ {
 		for c := 0; c < len(preset[r]); c++ {
-			//(gl.area)[(cRow+r)*gl.width+(cCol+c)] = preset[r][c]
-			//	rotate by 90 degrees
-			(gl.area)[(cCol+c)*gl.width+(cRow+r)] = preset[r][c]
-		}
-	}
-}
+			cellState := preset[r][c]&0x01 == 0x01
 
-func (gl *GoLWorld) ClearWorld() {
-	for idx := 0; idx < gl.length; idx++ {
-		(gl.area)[idx] = 0
-		(gl.nextArea)[idx] = 0
-	}
-}
-
-func (gl *GoLWorld) IsAlive(x, y int) bool {
-	x = (x + gl.width) % gl.width
-	y = (y + gl.height) % gl.height
-
-	return (gl.area)[y*gl.width+x]&0x01 == 0x01
-}
-
-func (gl *GoLWorld) AliveNeighbours(x, y int) uint8 {
-	aliveCount := uint8(0)
-
-	for r := -1; r <= 1; r++ {
-		for c := -1; c <= 1; c++ {
-			if r == 0 && c == 0 {
-				continue
-			}
-
-			if gl.IsAlive(x+c, y+r) {
-				aliveCount += 1
+			if cellState {
+				w.UpdateCell(cCol+c, cRow+r, cellState) // Set the cell to alive
 			}
 		}
 	}
-
-	return aliveCount
 }
 
-func (gl *GoLWorld) SetCell(x, y int, alive bool, neighbours uint8) {
-	idx := y*gl.width + x
-
-	if alive {
-		// sets the first bit to 1 and shifts the neighbours to the left by 1
-		(gl.nextArea)[idx] = 1 | byte(neighbours<<1)
-	} else {
-		// sets the first bit to 0 and shifts the neighbours to the left by 1
-		(gl.nextArea)[idx] = neighbours << 1
+func (w *GoLWorld) ClearWorld() {
+	for idx := range w.area {
+		w.area[idx] = 0
+		w.nextArea[idx] = 0
 	}
 }
 
-func (gl *GoLWorld) NextCellGeneration(x, y int) bool {
-	currentState := gl.IsAlive(x, y)
-	neighbours := gl.AliveNeighbours(x, y)
+func (w *GoLWorld) IsAlive(x, y int) bool {
+	x = (x + w.width) % w.width
+	y = (y + w.height) % w.height
 
-	if currentState {
-		return neighbours == 2 || neighbours == 3
-	} else {
-		return neighbours == 3
-	}
+	return w.area[y*w.width+x]&1 == 1 // Check if the cell is alive
 }
 
-func (gl *GoLWorld) NextGeneration() {
-	for y := 0; y < gl.height; y++ {
-		for x := 0; x < gl.width; x++ {
-			nextState := gl.NextCellGeneration(x, y)
-			neighbours := gl.AliveNeighbours(x, y)
+func (w *GoLWorld) GetArea() []byte {
+	//	return a copy of the area
+	area := make([]byte, w.length)
+	copy(area, w.area) // copy the area to avoid changing the original area
 
-			gl.SetCell(x, y, nextState, neighbours)
+	return area
+}
+
+func (w *GoLWorld) GetLength() int {
+	return w.length
+}
+
+func (w *GoLWorld) UpdateCell(x, y int, set bool) {
+	idx := y*w.width + x
+
+	if set {
+		// Set the cell to alive
+		w.area[idx] |= 0x01 // 0b00000001 Set the last bit to 1
+	} else {
+		// Set the cell to dead
+		w.area[idx] &= 0xFE // 0b11111110 Set the last bit to 0
+	}
+
+	w.updateSurroundCells(x, y, set)
+}
+func (w *GoLWorld) updateSurroundCells(x, y int, set bool) {
+	delta := byte(0x02)
+
+	for dy := -1; dy <= 1; dy++ {
+		for dx := -1; dx <= 1; dx++ {
+			if dx == 0 && dy == 0 {
+				continue // Skip the cell itself
+			}
+
+			nx, ny := (x+dx+w.width)%w.width, (y+dy+w.height)%w.height
+			idx := ny*w.width + nx
+
+			if set {
+				w.area[idx] += delta // Increment neighbor count
+			} else {
+				w.area[idx] -= delta // Decrement neighbor count
+			}
 		}
 	}
+}
 
-	// swap the areas
-	gl.area, gl.nextArea = gl.nextArea, gl.area
+func (w *GoLWorld) NextGeneration() {
+	copy(w.nextArea, w.area)
+	tempArea := w.nextArea
+
+	for idx := range w.area {
+		if tempArea[idx] == 0 {
+			continue // Skip dead cells to avoid unnecessary calculations
+		}
+
+		x := idx % w.width
+		y := idx / w.width
+
+		liveNeighbors := tempArea[idx] >> 1
+
+		// game rules
+		if tempArea[idx]&0x01 == 0x01 {
+			if liveNeighbors < 2 || liveNeighbors > 3 {
+				w.UpdateCell(x, y, false)
+			}
+		} else {
+			if liveNeighbors == 3 {
+				w.UpdateCell(x, y, true)
+			}
+		}
+	}
 }
