@@ -15,7 +15,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          apt install gcc -y
+          sudo apt install gcc -y
           sudo apt install -y \
             libc6-dev \
             libgl1-mesa-dev \
