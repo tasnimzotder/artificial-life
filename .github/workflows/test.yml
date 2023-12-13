@@ -8,24 +8,29 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DISPLAY: ":99.0"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt install gcc -y
-          sudo apt install -y \
-            libc6-dev \
-            libgl1-mesa-dev \
+          sudo -E apt-add-repository -y \
+            'ppa:ubuntu-toolchain-r' && \
+            sudo apt-get install libasound2-dev \
+            libglew-dev \
+            libgles2-mesa-dev \
+            libalut-dev \
             libxcursor-dev \
             libxi-dev \
             libxinerama-dev \
             libxrandr-dev \
-            libxxf86vm-dev \
-            libasound2-dev \
-            pkg-config
+            libxxf86vm-dev
+
+      - name: Xvfb
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
       - name: Set up Go
         uses: actions/setup-go@v4
