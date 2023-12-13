@@ -13,3 +13,24 @@ func FPSToMilliseconds(fps int64) int64 {
 	millis := time.Second.Milliseconds() / fps
 	return millis
 }
+
+func RandomColor0n255() uint8 {
+	r := rand.Intn(2)
+
+	if r == 0 {
+		return 0
+	}
+
+	return 255
+}
+
+func RandomColor255() uint8 {
+	return uint8(rand.Intn(255))
+}
+
+func EMod(a, b int) int {
+	// eMod is the euclidean modulo
+	// it returns a positive number
+
+	return (a%b + b) % b
+}

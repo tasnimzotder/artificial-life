@@ -1,19 +1,27 @@
 IMAGE_NAME = "tasnimzotder/artificial-life"
 
-dkr_build:
+dkr-build:
 	docker build -t $(IMAGE_NAME):latest .
 
-dkr_run:
+dkr-run:
 	docker run -it --rm -p 8080:8080 $(IMAGE_NAME):latest
 
-app-install:
-	rm -rf /Applications/Artificial\ Life.app/
-	fyne install -icon Icon.png
+wasm-build:
+	env GOOS=js GOARCH=wasm go build -o artificial-life.wasm github.com/tasnimzotder/artificial-life
 
-app-pack:
-	fyne package -os darwin -icon Icon.png
+wasm-copy:
+	cp $(go env GOROOT)/misc/wasm/wasm_exec.js .
 
-app-copy:
-	cp -r ./artificial-life.app /Applications
+mac-arm64-build:
+	env GOOS=darwin GOARCH=arm64 go build -o bin/artificial-life-mac-arm64.bin
 
-.PHONY: dkr_build dkr_run
+test:
+	go test ./... -v -cover
+
+test-viz:
+	go test ./... -v -cover -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html && open coverage.html
+
+bench:
+	go test ./... -bench=. -benchmem -benchtime=10s
+
+.PHONY: dkr-build dkr-run wasm-build wasm-copy mac-arm64-build test bench

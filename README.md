@@ -2,7 +2,7 @@
 
 ## Simulations
 
-1. Conway's Game of Life
+1. Conway's Game of Life: [GoL source file](./worlds/gol.world.go)
 2. Larger than Life
 3. SmoothLife __TODO__
 4. Lenia __(TODO)__
