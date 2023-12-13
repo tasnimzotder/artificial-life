@@ -19,7 +19,7 @@ test:
 	go test ./... -v -cover
 
 test-viz:
-	go test ./... -v -cover -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+	go test ./... -v -cover -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html && open coverage.html
 
 bench:
 	go test ./... -bench=. -benchmem -benchtime=10s

@@ -8,7 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tasnimzotder/artificial-life/constants"
 	"github.com/tasnimzotder/artificial-life/settings"
-	"log"
 	"math"
 	"time"
 )
@@ -59,12 +58,10 @@ func (g *Game) Update() error {
 	}
 
 	if g.isKeyJustPressed() {
-		log.Printf("Key pressed")
+		// do nothing
 	}
 
 	if g.Settings.IsReset {
-		log.Printf("Preset: %s", g.Settings.Preset)
-		//g.World.ClearCells()
 		g.createInitialPixels()
 		g.Settings.ResetSettings()
 
@@ -90,8 +87,7 @@ func (g *Game) Update() error {
 
 		if (currentMillis - prevUpdateMillis) >= 1000/int64(g.Settings.DesiredTPS) {
 			g.nextGeneration()
-			//delay := time.Since(time.Unix(0, prevUpdateMillis*1000000)).Milliseconds()
-			//fmt.Printf("Delay: %d\n", delay)
+
 			duration := time.Since(time.Unix(0, prevUpdateMillis*1000000))
 			g.ActualSpeeds = append(g.ActualSpeeds, duration.Milliseconds())
 
@@ -163,27 +159,20 @@ func (g *Game) isKeyJustPressed() bool {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// todo: shift the image/component variable to the struct
-	//screen.Fill(&color.RGBA{A: 0xff})
-
 	newScreenWidth := float64(ScreenWidth) * gridWidthPercentage
 	newScreenHeight := float64(ScreenHeight)
 
-	widthRatio := newScreenWidth / float64(g.Settings.WorldWidth)
-	heightRatio := float64(newScreenHeight) / float64(g.Settings.WorldHeight)
+	zoomFactor := float64(g.Settings.ZoomLevel)
 
-	widthRatioWithZoom := widthRatio * float64(g.Settings.ZoomLevel)
-	heightRatioWithZoom := heightRatio * float64(g.Settings.ZoomLevel)
+	visibleWidth := math.Round(newScreenWidth / zoomFactor)
+	visibleHeight := math.Round(newScreenHeight / zoomFactor)
 
-	visibleWidth := math.Round(newScreenWidth / widthRatioWithZoom)
-	visibleHeight := math.Round(float64(newScreenHeight) / heightRatioWithZoom)
-
-	if visibleWidth > float64(ScreenWidth) {
-		visibleWidth = float64(ScreenWidth)
+	if visibleWidth > newScreenWidth {
+		visibleWidth = newScreenWidth
 	}
 
-	if visibleHeight > float64(ScreenHeight) {
-		visibleHeight = float64(ScreenHeight)
+	if visibleHeight > newScreenHeight {
+		visibleHeight = newScreenHeight
 	}
 
 	grid := ebiten.NewImage(int(visibleWidth), int(visibleHeight))
@@ -192,7 +181,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 
-	op.GeoM.Scale(widthRatioWithZoom, heightRatioWithZoom)
+	op.GeoM.Scale(zoomFactor, zoomFactor)
 	// translate the image to the center of the screen
 	//op.GeoM.Translate(ScreenWidth/2-visibleWidth*widthRatioWithZoom/2, newScreenHeight/2-visibleHeight*widthRatioWithZoom/2)
 	op.Filter = ebiten.FilterNearest
@@ -224,9 +213,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(grid, op)
 	screen.DrawImage(controlPanel, opCtrlPanel)
 
+	g.showKeyboardShortcuts(screen, newScreenWidth)
+
 	g.UI.Draw(screen)
 }
 
+func (g *Game) showKeyboardShortcuts(screen *ebiten.Image, screenWidth float64) {
+	printString := ""
+	printString += "Keyboard Shortcuts\n"
+	printString += "------------------\n"
+	printString += "Space: Play/Pause\n"
+	printString += "Enter: Next Generation\n"
+	//printString += "R: Reset\n"
+	//printString += "F: Toggle Fullscreen\n"
+	printString += "Comma: Zoom Out\n"
+	printString += "Period: Zoom In\n"
+	printString += "Escape: Reset\n"
+	printString += "------------------\n"
+
+	ebitenutil.DebugPrintAt(screen, printString, int(screenWidth)+10, 550)
+}
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 	if ebiten.IsFullscreen() {

@@ -286,3 +286,11 @@ func BenchmarkGoLWorld_NextGeneration_1024(b *testing.B) {
 		world.NextGeneration()
 	}
 }
+
+func BenchmarkGoLWorld_NextGeneration_2048(b *testing.B) {
+	world := NewGoLWorld(2048, 2048)
+
+	for i := 0; i < b.N; i++ {
+		world.NextGeneration()
+	}
+}

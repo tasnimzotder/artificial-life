@@ -2,6 +2,8 @@ package worlds
 
 import (
 	"math/rand"
+	"runtime"
+	"sync"
 )
 
 type GoLWorld struct {
@@ -9,7 +11,8 @@ type GoLWorld struct {
 	nextArea []byte // temporary area for next generation
 	width    int
 	height   int
-	length   int // width * height
+	length   int         // width * height
+	mu       *sync.Mutex // mutex for thread safety when updating cells
 }
 
 func NewGoLWorld(width, height int) *GoLWorld {
@@ -19,6 +22,7 @@ func NewGoLWorld(width, height int) *GoLWorld {
 		width:    width,
 		height:   height,
 		length:   width * height,
+		mu:       &sync.Mutex{},
 	}
 
 	return w
@@ -121,25 +125,52 @@ func (w *GoLWorld) NextGeneration() {
 	copy(w.nextArea, w.area)
 	tempArea := w.nextArea
 
-	for idx := range w.area {
-		if tempArea[idx] == 0 {
-			continue // Skip dead cells to avoid unnecessary calculations
-		}
+	var wg sync.WaitGroup
+	numWorkers := runtime.NumCPU()
+	rowsPerWorker := w.height / numWorkers
 
-		x := idx % w.width
-		y := idx / w.width
+	worker := func(startRow, endRow int) {
+		defer wg.Done()
 
-		liveNeighbors := tempArea[idx] >> 1
+		for y := startRow; y < endRow; y++ {
+			for x := 0; x < w.width; x++ {
+				idx := y*w.width + x
+				if tempArea[idx] == 0 {
+					continue
+				}
 
-		// game rules
-		if tempArea[idx]&0x01 == 0x01 {
-			if liveNeighbors < 2 || liveNeighbors > 3 {
-				w.UpdateCell(x, y, false)
-			}
-		} else {
-			if liveNeighbors == 3 {
-				w.UpdateCell(x, y, true)
+				liveNeighbors := tempArea[idx] >> 1
+
+				// game rules
+				if tempArea[idx]&0x01 == 0x01 {
+					if liveNeighbors < 2 || liveNeighbors > 3 {
+						// to synchronize access to the area slice from multiple goroutines safely
+						w.mu.Lock()
+						w.UpdateCell(x, y, false)
+						w.mu.Unlock()
+					}
+				} else {
+					if liveNeighbors == 3 {
+						w.mu.Lock()
+						w.UpdateCell(x, y, true)
+						w.mu.Unlock()
+					}
+				}
 			}
 		}
 	}
+
+	// launch workers
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		startRow := i * rowsPerWorker
+		endRow := (i + 1) * rowsPerWorker
+		if i == numWorkers-1 {
+			endRow = w.height
+		}
+
+		go worker(startRow, endRow)
+	}
+
+	wg.Wait()
 }

@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
@@ -10,7 +9,6 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"image/color"
-	"log"
 )
 
 type UiWidget struct {
@@ -112,10 +110,8 @@ func getButton(name string, gs *settings.GameSettings) *widget.Button {
 			// todo: fix it
 			if name == "Start/Stop" {
 				gs.IsPaused = !gs.IsPaused
-				log.Printf("Button clicked: %s", name)
 			} else if name == "Reset" {
 				gs.IsReset = true
-				log.Printf("Button clicked: %s", name)
 			}
 
 		}),
@@ -147,10 +143,6 @@ func getInnerContainer(direction widget.Direction) *widget.Container {
 				Position: widget.RowLayoutPositionStart,
 				//Should this widget be stretched across the row or column
 				Stretch: false,
-				//How wide can this element grow to (override preferred widget size)
-				//MaxWidth: 100,
-				//How tall can this element grow to (override preferred widget size)
-				//MaxHeight: 100,
 			}),
 			//widget.WidgetOpts.MinSize(10, 10),
 		),
@@ -307,8 +299,6 @@ func getCombobox(comboType string, gs *settings.GameSettings) *widget.ListComboB
 			}),
 		//Callback when a new entry is selected
 		widget.ListComboButtonOpts.EntrySelectedHandler(func(args *widget.ListComboButtonEntrySelectedEventArgs) {
-			fmt.Println("Selected Entry: ", args.Entry)
-
 			if comboType == "GameType" {
 				gs.GameType = args.Entry.(ListEntry).name
 			} else if comboType == "Preset" {
@@ -387,8 +377,6 @@ func getSlider(name string, gs *settings.GameSettings) *widget.Slider {
 		widget.SliderOpts.ChangedHandler(func(args *widget.SliderChangedEventArgs) {
 			speed := int(args.Current)
 			gs.DesiredTPS = speed
-
-			fmt.Println(args.Current)
 		}),
 	)
 

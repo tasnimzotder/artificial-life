@@ -6,9 +6,23 @@ import (
 	"github.com/tasnimzotder/artificial-life/settings"
 	"github.com/tasnimzotder/artificial-life/ui"
 	"log"
+	"os"
+	"runtime/pprof"
 )
 
 func main() {
+	cpuFile, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatalf("Could not create CPU profile: %v", err)
+	}
+
+	if err := pprof.StartCPUProfile(cpuFile); err != nil {
+		log.Fatalf("Could not start CPU profile: %v", err)
+	}
+
+	defer pprof.StopCPUProfile()
+
+	// main program
 	gameSettings := settings.NewGameSettings()
 	uiWidgets := ui.NewUiWidget(gameSettings)
 
