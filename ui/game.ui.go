@@ -2,14 +2,15 @@ package ui
 
 import (
 	"fmt"
+	"math"
+	"time"
+
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tasnimzotder/artificial-life/constants"
 	"github.com/tasnimzotder/artificial-life/settings"
-	"math"
-	"time"
 )
 
 var (
@@ -164,8 +165,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	zoomFactor := float64(g.Settings.ZoomLevel)
 
-	visibleWidth := math.Round(newScreenWidth / zoomFactor)
-	visibleHeight := math.Round(newScreenHeight / zoomFactor)
+	visibleWidth := math.Floor(newScreenWidth / zoomFactor)
+	visibleHeight := math.Floor(newScreenHeight / zoomFactor)
 
 	if visibleWidth > newScreenWidth {
 		visibleWidth = newScreenWidth

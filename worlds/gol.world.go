@@ -32,8 +32,13 @@ func (w *GoLWorld) InitRandom() {
 	// clear the world first to avoid having to check for dead cells
 	w.ClearWorld()
 
-	for y := 0; y < w.height; y++ {
-		for x := 0; x < w.width; x++ {
+	//  initialize the world with random cells half of the grid
+
+	cH := w.height / 3
+	cW := w.width / 3
+
+	for y := cH; y < cH*2; y++ {
+		for x := cW; x < cW*2; x++ {
 			randomState := rand.Intn(2)
 
 			if randomState == 1 {
@@ -41,6 +46,16 @@ func (w *GoLWorld) InitRandom() {
 			}
 		}
 	}
+
+	// for y := 0; y < w.height; y++ {
+	// 	for x := 0; x < w.width; x++ {
+	// 		randomState := rand.Intn(2)
+
+	// 		if randomState == 1 {
+	// 			w.UpdateCell(x, y, true) // Set the cell to alive
+	// 		}
+	// 	}
+	// }
 }
 
 func (w *GoLWorld) InitPreset(preset [][]uint8) {

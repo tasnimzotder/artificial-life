@@ -33,7 +33,7 @@ func NewGameSettings() *GameSettings {
 	gs.Preset = "Random"
 	gs.GameType = gs.GameTypes[0]
 
-	gs.ZoomLevel = 1
+	gs.ZoomLevel = 13
 	gs.DesiredTPS = 2
 	gs.Radius = 1
 	gs.LtLRule = "Life"
@@ -53,8 +53,8 @@ func setDefaultSettings(gs *GameSettings) {
 	gs.IsPaused = true
 	gs.IsReset = false
 
-	gs.WorldWidth = 256 * 4
-	gs.WorldHeight = 256 * 4
+	gs.WorldWidth = 256 * 3
+	gs.WorldHeight = 256 * 3
 
 	gs.GameTypes = []string{
 		"Game of Life",

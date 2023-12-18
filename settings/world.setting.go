@@ -51,12 +51,6 @@ func (w *World) Draw(pixels *ebiten.Image, visibleWidth, visibleHeight int) {
 
 		for y := 0; y < visibleHeight; y++ {
 			for x := 0; x < visibleWidth; x++ {
-				//if w.GoLWorld.IsAlive((cy-visibleHeight/2)+y, (cx-visibleWidth/2)+x) {
-				//	pixels.Set(x, y, color.RGBA{200, 200, 200, 255})
-				//} else {
-				//	pixels.Set(x, y, color.RGBA{50, 50, 50, 255})
-				//}
-
 				ny := cy - visibleHeight/2 + y
 				nx := cx - visibleWidth/2 + x
 

@@ -109,3 +109,8 @@ Icon.png
 /bin
 **/*testdata*/**/*
 **/coverage.*
+
+cpu.*
+mem.*
+wasm_exec.js
+index.html
